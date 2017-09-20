@@ -24,9 +24,8 @@ func TestConvertMap(t *testing.T) {
 			},
 			want: map[string]interface{}{
 				"/slice": []string{"foo", "bar", "baz"},
-				"/map/country:japan": map[string]interface{}{
-					"/map/llustrator": []string{"カントク","鈴平ひろ"},
-				},
+				"/map/country": "japan",
+				"/map/llustrator": []string{"カントク","鈴平ひろ"},
 			},
 			err: false,
 		},
@@ -40,7 +39,7 @@ func TestConvertMap(t *testing.T) {
 		if test.err && err == nil {
 			t.Fatalf("should be error for %v but not:", test.input)
 		}
-		if reflect.DeepEqual(got, test.want) {
+		if !reflect.DeepEqual(got, test.want) {
 			t.Fatalf("want %q, but %q:", test.want, got)
 		}
 	}
