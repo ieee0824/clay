@@ -100,43 +100,13 @@ func set(v reflect.Value, val string) error {
 		switch v.Kind() {
 		case reflect.String:
 			v.SetString(val)
-		case reflect.Int:
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64 :
 			i64, err := strconv.ParseInt(val, 10, 64)
 			if err != nil {
 				return err
 			}
 			v.SetInt(i64)
-		case reflect.Int8:
-			i64, err := strconv.ParseInt(val, 10, 64)
-			if err != nil {
-				return err
-			}
-			v.SetInt(i64)
-		case reflect.Int16:
-			i64, err := strconv.ParseInt(val, 10, 64)
-			if err != nil {
-				return err
-			}
-			v.SetInt(i64)
-		case reflect.Int32:
-			i64, err := strconv.ParseInt(val, 10, 64)
-			if err != nil {
-				return err
-			}
-			v.SetInt(i64)
-		case reflect.Int64:
-			i64, err := strconv.ParseInt(val, 10, 64)
-			if err != nil {
-				return err
-			}
-			v.SetInt(i64)
-		case reflect.Float64:
-			f64, err := strconv.ParseFloat(val, 64)
-			if err != nil {
-				return err
-			}
-			v.SetFloat(f64)
-		case reflect.Float32:
+		case reflect.Float64, reflect.Float32:
 			f64, err := strconv.ParseFloat(val, 64)
 			if err != nil {
 				return err
@@ -195,7 +165,6 @@ func setVal(t interface{}, val string, names []string) error {
 				}
 			}
 		}
-
 	}
 	return nil
 }
