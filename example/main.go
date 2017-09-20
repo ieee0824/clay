@@ -1,9 +1,3 @@
-# clay
-
-## Example
-
-
-```
 package main
 
 import (
@@ -60,25 +54,3 @@ func main() {
 
 	fmt.Println(string(result))
 }
-```
-
-
-```
-$ go run example/main.go 
-{
-    "Str": "hoge",
-    "StrPtr": "hoge ptr",
-    "Int": 0,
-    "IntPtr": -10,
-    "Int64": 0,
-    "Int64Ptr": null,
-    "C": {
-        "Foo": "",
-        "Bar": null
-    },
-    "CPtr": {
-        "Foo": "baz",
-        "Bar": null
-    }
-}
-```
