@@ -164,10 +164,19 @@ func setVal(t interface{}, val string, names []string) error {
 			}
 			return nil
 		}
-		v := rv.Elem().FieldByName(names[0])
-		if err := set(v, val); err != nil {
-			return err
+		switch rv.Kind() {
+		case reflect.Ptr:
+			v := rv.Elem().FieldByName(names[0])
+			if err := set(v, val); err != nil {
+				return err
+			}
+		default:
+			v := rv.FieldByName(names[0])
+			if err := set(v, val); err != nil {
+				return err
+			}
 		}
+
 		return nil
 	} else if 1 < len(names) {
 		v := reflect.ValueOf(t).Elem().FieldByName(names[0])
