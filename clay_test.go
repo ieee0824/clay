@@ -1,44 +1,47 @@
 package clay
 
 import (
-	"testing"
-	"reflect"
-	"github.com/aws/aws-sdk-go/aws"
 	"encoding/json"
+	"reflect"
+	"testing"
 )
 
+func strPtr(s string) *string {
+	return &s
+}
+
 type T struct {
-	Foo string
-	Bar *string
-	Struct C
+	Foo       string
+	Bar       *string
+	Struct    C
 	StructPtr *C
 }
 
-func (t T)String() string {
+func (t T) String() string {
 	bin, _ := json.MarshalIndent(t, "", "    ")
 	return string(bin)
 }
 
 type C struct {
-	Int int
+	Int    int
 	IntPtr *int
 }
 
 func TestMold(t *testing.T) {
-	tests := []struct{
-		moldData string
+	tests := []struct {
+		moldData   string
 		structData T
-		want T
-		err  bool
+		want       T
+		err        bool
 	}{
 		{
-			moldData: "{}",
+			moldData:   "{}",
 			structData: T{},
-			want: T{},
-			err: false,
+			want:       T{},
+			err:        false,
 		},
 		{
-			moldData: `{"Foo": "hoge"}`,
+			moldData:   `{"Foo": "hoge"}`,
 			structData: T{},
 			want: T{
 				Foo: "hoge",
@@ -46,11 +49,11 @@ func TestMold(t *testing.T) {
 			err: false,
 		},
 		{
-			moldData: `{"Foo": "hoge", "Bar": "huga"}`,
+			moldData:   `{"Foo": "hoge", "Bar": "huga"}`,
 			structData: T{},
 			want: T{
 				Foo: "hoge",
-				Bar: aws.String("huga"),
+				Bar: strPtr("huga"),
 			},
 			err: false,
 		},
