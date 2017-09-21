@@ -4,29 +4,42 @@ import (
 	"testing"
 	"reflect"
 	"github.com/aws/aws-sdk-go/aws"
+	"encoding/json"
 )
 
+type T struct {
+	Foo string
+	Bar *string
+	Struct C
+	StructPtr *C
+}
+
+func (t T)String() string {
+	bin, _ := json.MarshalIndent(t, "", "    ")
+	return string(bin)
+}
+
+type C struct {
+	Int int
+	IntPtr *int
+}
+
 func TestMold(t *testing.T) {
-	type T struct {
-		Foo string
-		Bar *string
-	}
+
 	tests := []struct{
-		moldData interface{}
+		moldData string
 		structData T
 		want T
 		err  bool
 	}{
 		{
-			moldData: map[string]interface{}{},
+			moldData: "{}",
 			structData: T{},
 			want: T{},
 			err: false,
 		},
 		{
-			moldData: map[string]interface{}{
-				"Foo": "hoge",
-			},
+			moldData: `{"Foo": "hoge"}`,
 			structData: T{},
 			want: T{
 				Foo: "hoge",
@@ -34,10 +47,7 @@ func TestMold(t *testing.T) {
 			err: false,
 		},
 		{
-			moldData: map[string]interface{}{
-				"Foo": "hoge",
-				"Bar": "huga",
-			},
+			moldData: `{"Foo": "hoge", "Bar": "huga"}`,
 			structData: T{},
 			want: T{
 				Foo: "hoge",
@@ -45,10 +55,39 @@ func TestMold(t *testing.T) {
 			},
 			err: false,
 		},
+		{
+			moldData: `
+			{
+				"Struct":{
+					"Int": "10"
+				}
+			}`,
+			structData: T{},
+			want: T{
+				Struct: C{Int: 10},
+			},
+		},
+		{
+			moldData: `
+			{
+				"StructPtr":{
+					"Int": "10"
+				}
+			}`,
+			structData: T{},
+			want: T{
+				StructPtr: &C{Int: 10},
+			},
+		},
 	}
 
 	for _, test := range tests {
-		err := Mold(test.moldData, &test.structData)
+		mold := map[string]interface{}{}
+
+		if err := json.Unmarshal([]byte(test.moldData), &mold); err != nil {
+			panic(err)
+		}
+		err := Mold(mold, &test.structData)
 		if !test.err && err != nil {
 			t.Fatalf("should not be error for %v but: %v", test.moldData, err)
 		}
