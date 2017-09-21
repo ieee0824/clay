@@ -1,0 +1,18 @@
+version: 2
+jobs:
+    build:
+        working_directory: /go/src/github.com/ieee0824/clay
+        docker:
+            - image: golang:1.9
+              environment:
+                  GO15VENDOREXPERIMENT: 1
+        steps:
+            - checkout
+            - run:
+                name: Install glide
+                command: |
+                    go get github.com/Masterminds/glide
+            - run:
+                name: run test
+                command: |
+                    go test $(glide nv)
