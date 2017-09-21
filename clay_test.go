@@ -25,7 +25,6 @@ type C struct {
 }
 
 func TestMold(t *testing.T) {
-
 	tests := []struct{
 		moldData string
 		structData T
