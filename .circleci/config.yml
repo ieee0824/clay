@@ -12,3 +12,7 @@ jobs:
                 name: Install glide
                 command: |
                     go get github.com/Masterminds/glide
+            - run:
+                name: run test
+                command: |
+                    go test $(glide nv)
