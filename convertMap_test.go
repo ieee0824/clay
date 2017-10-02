@@ -1,18 +1,18 @@
 package clay
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestConvertMap(t *testing.T) {
 	tests := []struct {
 		input map[string]interface{}
-		want map[string]interface{}
-		err bool
+		want  map[string]interface{}
+		err   bool
 	}{
 		{
-			input:map[string]interface{}{
+			input: map[string]interface{}{
 				"slice": []string{"foo", "bar", "baz"},
 				"map": map[string]interface{}{
 					"country": "japan",
@@ -23,9 +23,9 @@ func TestConvertMap(t *testing.T) {
 				},
 			},
 			want: map[string]interface{}{
-				"/slice": []string{"foo", "bar", "baz"},
-				"/map/country": "japan",
-				"/map/llustrator": []string{"カントク","鈴平ひろ"},
+				"/slice":          []string{"foo", "bar", "baz"},
+				"/map/country":    "japan",
+				"/map/llustrator": []string{"カントク", "鈴平ひろ"},
 			},
 			err: false,
 		},

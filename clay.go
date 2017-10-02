@@ -1,11 +1,11 @@
 package clay
 
 import (
-	"reflect"
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
-	"encoding/json"
 )
 
 func mergeMap(src, dst map[string]interface{}) {
@@ -20,7 +20,7 @@ func malloc(v reflect.Value, val string) error {
 		e := reflect.New(v.Type().Elem())
 		n = e.Elem().Interface()
 	}
-	switch  n.(type) {
+	switch n.(type) {
 	case string:
 		v.Set(reflect.ValueOf(&val))
 	case int:
@@ -77,23 +77,37 @@ func convertMap(i interface{}, path string) (map[string]interface{}, error) {
 		return ret, nil
 
 	case reflect.Slice:
-		s, ok := i.([]interface{})
-		if !ok {
+		switch i.(type) {
+		case []interface{}:
+			s, ok := i.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("unsupport type: %v", reflect.TypeOf(i))
+			}
+			val, err := json.Marshal(s)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]interface{}{
+				path: string(val),
+			}, nil
+		case []string:
+			s, ok := i.([]string)
+			if !ok {
+				return nil, fmt.Errorf("unsupport type: %v", reflect.TypeOf(i))
+			}
+			return map[string]interface{}{
+				path: s,
+			}, nil
+		default:
 			return nil, fmt.Errorf("unsupport type: %v", reflect.TypeOf(i))
 		}
-		val, err := json.Marshal(s)
-		if err != nil {
-			return nil, err
-		}
-		return map[string] interface{} {
-			path: string(val),
-		}, nil
+
 	default:
 		s, ok := i.(string)
 		if !ok {
 			return nil, fmt.Errorf("unsupport type: %v", reflect.TypeOf(i))
 		}
-		return map[string]interface{} {
+		return map[string]interface{}{
 			path: s,
 		}, nil
 	}
@@ -115,7 +129,6 @@ func convertIntSlice(s []string) ([]int, error) {
 	return ret, nil
 }
 
-
 func set(v reflect.Value, val string) error {
 	if v.IsValid() {
 		switch v.Kind() {
@@ -127,7 +140,6 @@ func set(v reflect.Value, val string) error {
 			if err := json.Unmarshal([]byte(val), &slice); err != nil {
 				return err
 			}
-
 
 			for _, e := range slice {
 				buffer := reflect.New(v.Type().Elem()).Interface()
@@ -147,12 +159,10 @@ func set(v reflect.Value, val string) error {
 					sliceVal = reflect.Append(sliceVal, reflect.ValueOf(buffer))
 				}
 
-
 			}
 			v.Set(sliceVal)
 
-
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64 :
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			i64, err := strconv.ParseInt(val, 10, 64)
 			if err != nil {
 				return err
@@ -221,8 +231,7 @@ func setVal(t interface{}, val string, names []string) error {
 	return nil
 }
 
-
-func Mold(moldData, s interface{})error{
+func Mold(moldData, s interface{}) error {
 	m, err := convertMap(moldData, "")
 	if err != nil {
 		return err

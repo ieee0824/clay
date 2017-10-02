@@ -1,14 +1,14 @@
 package clay
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestMergeMap(t *testing.T) {
-	tests := []struct{
-		src map[string]interface{}
-		dst map[string]interface{}
+	tests := []struct {
+		src  map[string]interface{}
+		dst  map[string]interface{}
 		want map[string]interface{}
 	}{
 		{
@@ -23,12 +23,12 @@ func TestMergeMap(t *testing.T) {
 		{
 			map[string]interface{}{
 				"hoge": "huga",
-				"foo": "bar",
+				"foo":  "bar",
 			},
 			map[string]interface{}{},
 			map[string]interface{}{
 				"hoge": "huga",
-				"foo": "bar",
+				"foo":  "bar",
 			},
 		},
 		{
@@ -40,7 +40,7 @@ func TestMergeMap(t *testing.T) {
 			},
 			map[string]interface{}{
 				"hoge": "huga",
-				"foo": "bar",
+				"foo":  "bar",
 			},
 		},
 		{
@@ -49,11 +49,11 @@ func TestMergeMap(t *testing.T) {
 			},
 			map[string]interface{}{
 				"hoge": "baz",
-				"foo": "bar",
+				"foo":  "bar",
 			},
 			map[string]interface{}{
 				"hoge": "baz",
-				"foo": "bar",
+				"foo":  "bar",
 			},
 		},
 	}
