@@ -17,6 +17,7 @@ type T struct {
 	Int64Ptr *int64
 	C        Children
 	CPtr     *Children
+	Array    []Children
 }
 
 type Children struct {
@@ -33,7 +34,10 @@ func main() {
 		"IntPtr": "-10",
 		"CPtr":{
 			"Foo": "baz"
-		}
+		},
+		"Array": [
+			{"Foo": "hoge"}
+		]
 	}
 	`
 

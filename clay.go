@@ -2,10 +2,10 @@ package clay
 
 import (
 	"reflect"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+	"encoding/json"
 )
 
 func mergeMap(src, dst map[string]interface{}) {
@@ -64,7 +64,7 @@ func convertMap(i interface{}, path string) (map[string]interface{}, error) {
 		ret := map[string]interface{}{}
 		m, ok := i.(map[string]interface{})
 		if !ok {
-			return nil, errors.New("")
+			return nil, fmt.Errorf("unsupport type: %v", reflect.TypeOf(i))
 		}
 
 		for k, v := range m {
@@ -77,17 +77,21 @@ func convertMap(i interface{}, path string) (map[string]interface{}, error) {
 		return ret, nil
 
 	case reflect.Slice:
-		s, ok := i.([]string)
+		s, ok := i.([]interface{})
 		if !ok {
-			return nil, errors.New("")
+			return nil, fmt.Errorf("unsupport type: %v", reflect.TypeOf(i))
+		}
+		val, err := json.Marshal(s)
+		if err != nil {
+			return nil, err
 		}
 		return map[string] interface{} {
-			path: s,
+			path: string(val),
 		}, nil
 	default:
 		s, ok := i.(string)
 		if !ok {
-			return nil, errors.New("")
+			return nil, fmt.Errorf("unsupport type: %v", reflect.TypeOf(i))
 		}
 		return map[string]interface{} {
 			path: s,
@@ -95,11 +99,59 @@ func convertMap(i interface{}, path string) (map[string]interface{}, error) {
 	}
 }
 
+func convertIntSlice(s []string) ([]int, error) {
+	ret := make([]int, len(s))
+
+	for i, v := range s {
+		if v == "" {
+			ret[i] = 0
+		}
+		i64, err := strconv.ParseInt("255", 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		ret[i] = int(i64)
+	}
+	return ret, nil
+}
+
+
 func set(v reflect.Value, val string) error {
 	if v.IsValid() {
 		switch v.Kind() {
 		case reflect.String:
 			v.SetString(val)
+		case reflect.Slice:
+			var slice []interface{}
+			var sliceVal = reflect.New(reflect.SliceOf(v.Type().Elem())).Elem()
+			if err := json.Unmarshal([]byte(val), &slice); err != nil {
+				return err
+			}
+
+
+			for _, e := range slice {
+				buffer := reflect.New(v.Type().Elem()).Interface()
+
+				bin, err := json.Marshal(e)
+				if err != nil {
+					return err
+				}
+				if err := json.Unmarshal(bin, buffer); err != nil {
+					return err
+				}
+
+				switch reflect.ValueOf(buffer).Kind() {
+				case reflect.Ptr:
+					sliceVal = reflect.Append(sliceVal, reflect.ValueOf(reflect.ValueOf(buffer).Elem().Interface()))
+				default:
+					sliceVal = reflect.Append(sliceVal, reflect.ValueOf(buffer))
+				}
+
+
+			}
+			v.Set(sliceVal)
+
+
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64 :
 			i64, err := strconv.ParseInt(val, 10, 64)
 			if err != nil {
@@ -178,14 +230,16 @@ func Mold(moldData, s interface{})error{
 
 	for k, val := range m {
 		k = strings.TrimPrefix(k, "/")
-		strVal, ok := val.(string)
-		if !ok {
-			return errors.New("unsupport type")
+		switch v := val.(type) {
+		case string:
+			err := setVal(s, v, strings.Split(k, "/"))
+			if err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("unsupport type: %v", reflect.TypeOf(val))
 		}
-		err := setVal(s, strVal, strings.Split(k, "/"))
-		if err != nil {
-			return err
-		}
+
 	}
 
 	return nil
